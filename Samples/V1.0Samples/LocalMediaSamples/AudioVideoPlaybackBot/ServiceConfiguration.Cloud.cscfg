@@ -4,15 +4,16 @@
     <Instances count="2" />
     <ConfigurationSettings>
       <Setting name="Microsoft.WindowsAzure.Plugins.Diagnostics.ConnectionString" value="DefaultEndpointsProtocol=https;AccountName=$storage$;AccountKey=$storageKey$" />
-      <Setting name="ServiceDnsName" value="%ServiceDns%" />
+      <Setting name="ServiceDnsName" value="audiovideoplaybackbot-paul-2020-03-27.cloudapp.net" />
       <!-- xyz.cloudapp.net-->
-      <Setting name="ServiceCNAME" value="%CName%" />
+      <Setting name="ServiceCNAME" value="avpbot-paul.ftrdev.com" />
       <!-- CNAME pointing to the .cloudapp.net if available.-->
-      <Setting name="DefaultCertificate" value="ABC0000000000000000000000000000000000CBA" />
+      <Setting name="DefaultCertificate" value="473CF64BA702DDDE43A35304AD9A8CDA913BB7E3" />
       <Setting name="APPINSIGHTS_INSTRUMENTATIONKEY" value="" />
     </ConfigurationSettings>
     <Certificates>
-      <Certificate name="Default" thumbprint="ABC0000000000000000000000000000000000CBA" thumbprintAlgorithm="sha1" />
+      <Certificate name="Default" thumbprint="473CF64BA702DDDE43A35304AD9A8CDA913BB7E3" thumbprintAlgorithm="sha1" />
+      <Certificate name="LE" thumbprint="E6A3B45B062D509B3382282D196EFE97D5956CCB" thumbprintAlgorithm="sha1" />
     </Certificates>
   </Role>
   <NetworkConfiguration>

@@ -46,6 +46,7 @@
     </LocalResources>
     <Certificates>
       <Certificate name="Default" storeLocation="LocalMachine" storeName="My" />
+      <Certificate name="LE" storeLocation="LocalMachine" storeName="CA" />
     </Certificates>
   </WorkerRole>
 </ServiceDefinition>

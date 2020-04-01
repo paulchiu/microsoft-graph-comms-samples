@@ -48,6 +48,9 @@
   <ItemGroup>
     <Folder Include="Profiles" />
   </ItemGroup>
+  <ItemGroup>
+    <PublishProfile Include="Profiles\AudioVideoPlaybackBot-Paul-2020-03-27Production2.azurePubxml" />
+  </ItemGroup>
   <!-- Import the target files for this project template -->
   <PropertyGroup>
     <VisualStudioVersion Condition=" '$(VisualStudioVersion)' == '' ">10.0</VisualStudioVersion>
