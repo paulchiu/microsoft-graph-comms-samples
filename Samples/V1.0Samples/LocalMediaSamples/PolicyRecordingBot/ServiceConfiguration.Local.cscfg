@@ -4,7 +4,7 @@
     <Instances count="1" />
     <ConfigurationSettings>
       <Setting name="Microsoft.WindowsAzure.Plugins.Diagnostics.ConnectionString" value="DefaultEndpointsProtocol=https;AccountName=$storage$;AccountKey=$storageKey$" />
-      <Setting name="ServiceDnsName" value="policy-recording-paul-2020-04-06.cloudapp.net" />
+      <Setting name="ServiceDnsName" value="policy-recording-bot-paul-2020-04-06.cloudapp.net" />
       <!-- xyz.cloudapp.net-->
       <Setting name="ServiceCNAME" value="paul.ftrdev.com" />
       <!-- CNAME pointing to the .cloudapp.net if available.-->
