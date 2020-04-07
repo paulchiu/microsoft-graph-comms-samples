@@ -233,6 +233,7 @@ namespace Sample.PolicyRecordingBot.WorkerRole
                 : this.GetInstancePublicIpAddress(this.ServiceDnsName);
 
             string serviceFqdn = RoleEnvironment.IsEmulated ? "0.ngrok.skype-graph-test.net" : this.ServiceCname;
+            serviceFqdn = this.ServiceCname;
 
             this.MediaPlatformSettings = new MediaPlatformSettings()
             {
