@@ -29,8 +29,7 @@ This section walks you through the process of deploying and testing the sample b
 
 Open powershell (in admin mode) and run the following commands. When prompted for authentication, login with the tenant admin.
   * `> Import-Module SkypeOnlineConnector`
-  * `> $userCredential = Get-Credential`
-  * `> $sfbSession = New-CsOnlineSession -Credential $userCredential -Verbose`
+  * `> $sfbSession = New-CsOnlineSession -Verbose`
   * `> Import-PSSession $sfbSession`
   * `> New-CsOnlineApplicationInstance -UserPrincipalName <upn@contoso.com> -DisplayName <displayName> -ApplicationId <your_botappId>`
   * `> Sync-CsOnlineApplicationInstance -ObjectId <objectId>`
@@ -55,25 +54,81 @@ To verify your policy was assigned correctly:
 * Install the prerequisites:
     * [Visual Studio 2017+](https://visualstudio.microsoft.com/downloads/)
     * [PostMan](https://chrome.google.com/webstore/detail/postman/fhbjgbiflinjbdggehcddcbncdddomop)
+    * [Ngrok](https://ngrok.com/download)
+      * **Note:** You will need a paid pro account.
 
-### Deploy
+### Test Locally
 
-1. Create a cloud service (classic) in Azure. Get your "Site URL" from Azure portal, this will be your DNS name and CN name for later configuration, for example: `bot.contoso.com`.
+#### Nrgok
 
-1. Set up SSL certificate and upload to the cloud service
-    1. Create a wildcard certificate for your service. This certificate should not be a self-signed certificate. For instance, if your bot is hosted at `bot.contoso.com`, create the certificate for `*.contoso.com`.
-    2. Upload the certificate to the cloud service.
-    3. Copy the thumbprint for later.
+1. Navigate to [Reserved Domains](https://dashboard.ngrok.com/endpoints/domains) in your Ngrok account and reserve a domain. We will configure Azure and the bot to point to this domain.
 
-1. Set up cloud service configuration
-    1. Open powershell, go to the folder that contains file `configure_cloud.ps1`. The file is in the `Samples` directory.
-    2. Run the powershell script with parameters:
-        * `> .\configure_cloud.ps1 -p .\BetaSamples\LocalMediaSamples\PolicyRecordingBot\ -dns {your DNS name} -cn {your CN name, should be the same as your DNS name} -thumb {your certificate thumbprint} -bid {your bot name} -aid {your bot app id} -as {your bot secret}`, for example `.\configure_cloud.ps1 -p .\BetaSamples\LocalMediaSamples\PolicyRecordingBot\ -dns bot.contoso.com -cn bot.contoso.com -thumb ABC0000000000000000000000000000000000CBA -bid bot -aid 3853f935-2c6f-43d7-859d-6e8f83b519ae -as 123456!@#$%^`
+2. Now navigate to [TCP Addresses](https://dashboard.ngrok.com/endpoints/tcp-addresses) and reserve a TCP port. This will be used to push incoming streams to.
 
-1. Publish the bot from VS:
-    1. Right click PolicyRecordingBot, then click `Publish...`. Publish it to the cloud service you created earlier.
+3. With those two reserved, now it's time to configure ngrok on our local machine to forward our newly configured endpoints to localhost running on our machines.
 
-### Test
+    Create a new `ngrok.yaml` then paste the following in that file:
+
+    ```yaml
+      authtoken: YOUR_AUTH_TOKEN
+      tunnels:
+      signaling:
+        addr: "https://localhost:9441"
+        proto: http
+        subdomain: YOUR_NGROK_SUBDOMAIN
+        host_header: "localhost:9441"
+      media: 
+        addr: 8445
+        proto: tcp
+        remote_addr: "YOUR_RESERVED_TCP_ADDRESS_INCLUDING_PORT"
+
+    ```
+
+    Make sure you replace:
+
+    * `YOUR_AUTH_TOKEN` with your Ngrok auth token.
+    * `YOUR_NGROK_SUBDOMAIN` with the subdomain you reserved in Ngrok in step 1.
+    * `YOUR_RESERVED_TCP_ADDRESS_INCLUDING_PORT` with the full TCP reserved address (including the port) created in step 2. For example, `1.tcp.ngrok.io:1111`.
+
+4. Now with that configured, it's time to run Ngrok. Open up a new terminal instance and run the following command:
+
+    ```cmd
+      ngrok start -all -config ngrok.yaml
+    ```
+
+    If everything works you should be able to hit the reserved domain from step 1 and see traffic coming through on `localhost:9441`.
+
+5. Generate certificates for your reserved domain and install on your machine. Make sure you copy your certificate's thumbprint - we will need this later. To help with this, see https://github.com/jakkaj/sslngrokdevcontiner.
+
+#### RecordingBot
+
+1. Under `Entry`, create a new file called `App.Secrets.config` and copy the following:
+
+    ```xml
+      <appSettings>
+        <add key="BotName" value="%BotName%" />
+        <add key="AadAppId" value="%AppId%" />
+        <add key="AadAppSecret" value="%AppSecret%" />
+        <add key="ServiceDnsName" value="%ServiceDns%" />
+        <add key="CertificateThumbprint" value="ABC0000000000000000000000000000000000CBA" />
+        <add key="InstancePublicPort" value="%PublicTCPPort%" />
+      </appSettings>
+    ```
+
+    Make sure you replace the following:
+
+    * `%BotName%` with the name of your Bot Channel Registry name.
+    * `%AppId%` your bot ID.
+    * `%AppSecret%` your bot's secret.
+    * `%ServiceDns%` your reserved domain (e.g. `mybot.ngrok.io`) created in step 1 of section [Ngrok](#nrgok).
+    * `ABC0000000000000000000000000000000000CBA` your certificate's thumbprint from step 5 of section [Ngrok](#nrgok).
+    * `%PublicTCPPort%` your TCP port (e.g. `11111`) reserved in step 2 of section [Ngrok](#nrgok).
+
+2. Launch `RecordingBot.sln` in Visual Studio, make sure `Entry` is set as default and you can build the project without errors.
+
+3. Make sure Ngrok is running and then run `Entry` from Visual Studio. A console window will popup and you should see a message saying `Hit`. Once the bot is up and running, you'll see the message `Running`. Once you see that, you can test the bot using Teams.
+
+#### Teams
 
 1. Set up the test meeting and test clients:
    1. Sign in to Teams client with a non-recorded test tenant user.
